@@ -1,8 +1,9 @@
 import React, { useCallback, useState, useEffect } from 'react';
 
 import { ITodo } from '../types';
-import { extractId, createTodo, persistTodos, getStoredTodos } from '../utils/todo';
+import { extractId } from '../utils/todo';
 import { useOrderedList } from '../hooks/useOrderedList';
+import { useTodosState } from '../hooks/useTodosState';
 import { useGlobalKeystroke, Key } from '../hooks/useGlobalKeystroke';
 import classes from './App.module.css';
 
@@ -48,14 +49,14 @@ function ListItem(props: IListItemProps) {
 }
 
 export function App() {
-  const [list, setList] = useState<ITodo[]>(getStoredTodos());
+  const { todosList, deleteTodo, addTodo } = useTodosState();
   const [inputValue, setInputValue] = useState('');
   const {
     selectedIndex,
     selectPrevious,
     selectNext,
     selectItemById,
-  } = useOrderedList(list, extractId);
+  } = useOrderedList(todosList, extractId);
 
   const handleInputBlur = useCallback((evt) => {
       evt.target.focus();
@@ -68,21 +69,13 @@ export function App() {
           return;
       }
 
-      setList(list.concat(createTodo(inputValue)));
+      addTodo(inputValue);
       setInputValue('');
-  }, [list, setList, inputValue, setInputValue]);
-
-  const handleDelete = useCallback((idToDelete: ITodo['id']) => {
-      setList(list.filter(item => item.id !== idToDelete));
-  }, [list, selectedIndex, setList]);
+  }, [addTodo, inputValue, setInputValue]);
 
   useGlobalKeystroke(Key.Enter, handleSubmit);
   useGlobalKeystroke(Key.ArrowDown, selectNext);
   useGlobalKeystroke(Key.ArrowUp, selectPrevious);
-
-  useEffect(() => {
-      persistTodos(list);
-  }, [list]);
 
   return (
     <div className="App">
@@ -94,13 +87,13 @@ export function App() {
       />
 
       <ul>
-        {list.map((item, i) => (
+        {todosList.map((item, i) => (
             <ListItem
                 key={item.id}
                 item={item}
                 isSelected={i === selectedIndex}
                 onSelect={selectItemById}
-                onDelete={handleDelete}
+                onDelete={deleteTodo}
             />
         ))}
       </ul>
