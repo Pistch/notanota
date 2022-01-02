@@ -13,6 +13,7 @@ interface ITodo {
 interface IListItemProps {
     isSelected: boolean;
     item: ITodo;
+    onSelect: (id: ITodo['id']) => void;
     onDelete: (idToDelete: ITodo['id']) => void;
 }
 
@@ -24,19 +25,29 @@ function ListItemControls(props: IListItemProps) {
 
     useGlobalKeystroke(Key.Escape, handleDelete);
 
-    return null;
+    return (
+        <div style={{ display: 'inline-block', marginRight: 10 }}>
+            <button onClick={handleDelete}>x</button>
+        </div>
+    );
 }
 
 function ListItem(props: IListItemProps) {
+    const { onSelect, isSelected, item } = props;
+    const handleMouseEnter = useCallback(() => {
+        props.onSelect(props.item.id);
+    }, [item, onSelect]);
+
     return (
-        <React.Fragment>
-            <li className={props.isSelected ? classes.selected : ''}>
-                {props.item.text}
+            <li
+                className={isSelected ? classes.selected : ''}
+                onMouseEnter={handleMouseEnter}
+            >
+                <span>{item.text}</span>
+                {isSelected && (
+                    <ListItemControls {...props} />
+                )}
             </li>
-            {props.isSelected && (
-                <ListItemControls {...props} />
-            )}
-        </React.Fragment>
     );
 }
 
@@ -62,6 +73,7 @@ export function App() {
     selectedIndex,
     selectPrevious,
     selectNext,
+    selectItemById,
   } = useOrderedList(list, extractId);
 
   const handleInputBlur = useCallback((evt) => {
@@ -102,6 +114,7 @@ export function App() {
                 key={item.id}
                 item={item}
                 isSelected={i === selectedIndex}
+                onSelect={selectItemById}
                 onDelete={handleDelete}
             />
         ))}
