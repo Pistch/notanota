@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 
 import { uniqid } from '../utils/uniqid';
 import { useOrderedList } from '../hooks/useOrderedList';
@@ -60,14 +60,37 @@ function createTodo(text: string) {
     };
 }
 
+const lsKey = 'todos';
+
+function persist(todos: ITodo[]) {
+    localStorage.setItem(lsKey, JSON.stringify(todos));
+}
+
+function fillInitialList() {
+    return [
+        'Todo 1',
+        'Todo 2',
+        'Todo 3',
+        'Todo 4',
+    ].map(createTodo);
+}
+
+function getStoredTodos() {
+    try {
+        const stored = localStorage.getItem(lsKey);
+
+        if (!stored) {
+            return fillInitialList();
+        }
+
+        return JSON.parse(stored);
+    } catch (_e) {
+        return [];
+    }
+}
+
 export function App() {
-  const [list, setList] = useState<ITodo[]>([
-      createTodo('aaaaaaa'),
-      createTodo('bbbbbbb'),
-      createTodo('ccccccc'),
-      createTodo('ddddddd'),
-      createTodo('eeeeeee'),
-  ]);
+  const [list, setList] = useState<ITodo[]>(getStoredTodos());
   const [inputValue, setInputValue] = useState('');
   const {
     selectedIndex,
@@ -98,6 +121,10 @@ export function App() {
   useGlobalKeystroke(Key.Enter, handleSubmit);
   useGlobalKeystroke(Key.ArrowDown, selectNext);
   useGlobalKeystroke(Key.ArrowUp, selectPrevious);
+
+  useEffect(() => {
+      persist(list);
+  }, [list]);
 
   return (
     <div className="App">
