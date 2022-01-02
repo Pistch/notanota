@@ -51,7 +51,7 @@ export function useOrderedList<TItem>(list: TItem[], getId: (item: TItem) => str
     }, [list, selectedIndex, selectItemByIndex]);
 
     useEffect(() => {
-        if (!selectedIndex) {
+        if (selectedIndex < 0) {
             return;
         }
 
