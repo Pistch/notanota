@@ -2,28 +2,89 @@ import React, { useCallback, useState, useEffect, useMemo } from 'react';
 
 import classes from './App.module.css';
 
-function useOrderedList<TItem>(list: TItem[], getKey: (item: TItem) => string) {
+function useOrderedList<TItem>(list: TItem[], getId: (item: TItem) => string) {
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selectItemByIndex = useCallback((index: number) => {
+      let realIndex = index;
+
+      if (realIndex < 0 || realIndex > list.length - 1) {
+          realIndex = -1;
+      }
+
+      setSelectedIndex(realIndex);
+
+      if (realIndex === -1) {
+          setSelectedId(null);
+      } else {
+          setSelectedId(getId(list[realIndex]));
+      }
+  }, [list, setSelectedIndex, setSelectedId, getId]);
+  const selectItemById = useCallback((id: string | null) => {
+      let item = null;
+
+      if (id !== null) {
+          item = list.find(item => getId(item) === id);
+      }
+
+      if (item) {
+          setSelectedId(id);
+          setSelectedIndex(list.indexOf(item));
+      } else {
+          setSelectedId(null);
+          setSelectedIndex(-1);
+      }
+  }, [list, setSelectedIndex, setSelectedId, getId]);
   const selectNext = useCallback(() => {
       if (selectedIndex === list.length - 1) {
-          setSelectedIndex(-1);
+          selectItemByIndex(-1);
       } else {
-          setSelectedIndex(selectedIndex + 1);
+          selectItemByIndex(selectedIndex + 1);
       }
-  }, [list, selectedIndex, setSelectedIndex]);
+  }, [list, selectedIndex, selectItemByIndex]);
   const selectPrevious = useCallback(() => {
       if (selectedIndex === - 1) {
-          setSelectedIndex( list.length - 1);
+          selectItemByIndex( list.length - 1);
       } else if (selectedIndex === 0) {
-          setSelectedIndex(-1);
+          selectItemByIndex(-1);
       } else {
-          setSelectedIndex(selectedIndex - 1);
+          selectItemByIndex(selectedIndex - 1);
       }
-  }, [list, selectedIndex, setSelectedIndex]);
+  }, [list, selectedIndex, selectItemByIndex]);
+
+  useEffect(() => {
+      if (!selectedIndex) {
+          return;
+      }
+
+      if (selectedIndex > list.length - 1) {
+          const newItemIndex = list.findIndex(item => getId(item) === selectedId);
+
+          selectItemByIndex(newItemIndex);
+
+          return;
+      }
+
+      const isItemStillInPlace = getId(list[selectedIndex]) === selectedId;
+
+      if (isItemStillInPlace) {
+          return;
+      }
+
+      const newItemIndex = list.findIndex(item => getId(item) === selectedId);
+
+      if (newItemIndex < 0 && selectedIndex < list.length - 1) {
+          selectItemByIndex(selectedIndex);
+      } else {
+          selectItemByIndex(newItemIndex);
+      }
+  }, [list]);
 
   return {
+    selectedId,
     selectedIndex,
-    setSelectedIndex,
+    selectItemByIndex,
+    selectItemById,
     selectNext,
     selectPrevious
   };
@@ -52,30 +113,42 @@ function useGlobalKeystroke(keystroke: string, callback: () => void) {
     }, [handler]);
 }
 
-const list = [
-    'aaaaaaa',
-    'bbbbbbb',
-    'ccccccc',
-    'ddddddd',
-    'eeeeeee',
-];
+const extractId = (s: string) => s;
 
 export function App() {
+  const [list, setList] = useState([
+      'aaaaaaa',
+      'bbbbbbb',
+      'ccccccc',
+      'ddddddd',
+      'eeeeeee',
+  ]);
   const [inputValue, setInputValue] = useState('');
-  const handleInputBlur = useCallback((evt) => {
-    evt.target.focus();
-  }, []);
-  const handleInputChange = useCallback((evt) => {
-    setInputValue(evt.target.value);
-  }, []);
-
   const {
     selectedIndex,
-    // setSelectedIndex,
     selectPrevious,
     selectNext,
-  } = useOrderedList(list, s => s);
+  } = useOrderedList(list, extractId);
 
+  const handleInputBlur = useCallback((evt) => {
+      evt.target.focus();
+  }, []);
+  const handleInputChange = useCallback((evt) => {
+      setInputValue(evt.target.value);
+  }, [setInputValue]);
+  const handleSubmit = useCallback(() => {
+      setList(list.concat(inputValue));
+      setInputValue('');
+  }, [list, setList, inputValue, setInputValue]);
+
+  const handleDelete = useCallback(() => {
+      if (selectedIndex > -1) {
+          setList(list.filter(item => item !== list[selectedIndex]));
+      }
+  }, [list, selectedIndex, setList]);
+
+  useGlobalKeystroke('Enter', handleSubmit);
+  useGlobalKeystroke('Escape', handleDelete);
   useGlobalKeystroke('ArrowDown', selectNext);
   useGlobalKeystroke('ArrowUp', selectPrevious);
 
