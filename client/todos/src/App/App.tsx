@@ -1,14 +1,10 @@
 import React, { useCallback, useState, useEffect } from 'react';
 
-import { uniqid } from '../utils/uniqid';
+import { ITodo } from '../types';
+import { extractId, createTodo, persistTodos, getStoredTodos } from '../utils/todo';
 import { useOrderedList } from '../hooks/useOrderedList';
 import { useGlobalKeystroke, Key } from '../hooks/useGlobalKeystroke';
 import classes from './App.module.css';
-
-interface ITodo {
-    id: string;
-    text: string;
-}
 
 interface IListItemProps {
     isSelected: boolean;
@@ -51,44 +47,6 @@ function ListItem(props: IListItemProps) {
     );
 }
 
-const extractId = (todo: ITodo) => todo.id;
-
-function createTodo(text: string) {
-    return {
-        id: uniqid('todo'),
-        text,
-    };
-}
-
-const lsKey = 'todos';
-
-function persist(todos: ITodo[]) {
-    localStorage.setItem(lsKey, JSON.stringify(todos));
-}
-
-function fillInitialList() {
-    return [
-        'Todo 1',
-        'Todo 2',
-        'Todo 3',
-        'Todo 4',
-    ].map(createTodo);
-}
-
-function getStoredTodos() {
-    try {
-        const stored = localStorage.getItem(lsKey);
-
-        if (!stored) {
-            return fillInitialList();
-        }
-
-        return JSON.parse(stored);
-    } catch (_e) {
-        return [];
-    }
-}
-
 export function App() {
   const [list, setList] = useState<ITodo[]>(getStoredTodos());
   const [inputValue, setInputValue] = useState('');
@@ -123,7 +81,7 @@ export function App() {
   useGlobalKeystroke(Key.ArrowUp, selectPrevious);
 
   useEffect(() => {
-      persist(list);
+      persistTodos(list);
   }, [list]);
 
   return (
