@@ -1,52 +1,10 @@
 import React, { useCallback, useState } from 'react';
 
-import { ITodo } from '../types';
+import { TodoItem } from '../components/TodoItem';
 import { extractId } from '../utils/todo';
 import { useOrderedList } from '../hooks/useOrderedList';
 import { useTodosState } from '../hooks/useTodosState';
 import { useGlobalKeystroke, Key } from '../hooks/useGlobalKeystroke';
-import classes from './App.module.css';
-
-interface IListItemProps {
-    isSelected: boolean;
-    item: ITodo;
-    onSelect: (id: ITodo['id']) => void;
-    onDelete: (idToDelete: ITodo['id']) => void;
-}
-
-function ListItemControls(props: IListItemProps) {
-    const { onDelete, item } = props;
-    const handleDelete = useCallback(() => {
-        onDelete(item.id);
-    }, [onDelete, item]);
-
-    useGlobalKeystroke(Key.Escape, handleDelete);
-
-    return (
-        <div style={{ display: 'inline-block', marginRight: 10 }}>
-            <button onClick={handleDelete}>x</button>
-        </div>
-    );
-}
-
-function ListItem(props: IListItemProps) {
-    const { onSelect, isSelected, item } = props;
-    const handleMouseEnter = useCallback(() => {
-        props.onSelect(props.item.id);
-    }, [item, onSelect]);
-
-    return (
-        <li
-            className={isSelected ? classes.selected : ''}
-            onMouseEnter={handleMouseEnter}
-        >
-            <span>{item.text}</span>
-            {isSelected && (
-                <ListItemControls {...props} />
-            )}
-        </li>
-    );
-}
 
 export function App() {
   const { todosList, deleteTodo, addTodo } = useTodosState();
@@ -88,7 +46,7 @@ export function App() {
 
       <ul>
         {todosList.map((item, i) => (
-            <ListItem
+            <TodoItem
                 key={item.id}
                 item={item}
                 isSelected={i === selectedIndex}
