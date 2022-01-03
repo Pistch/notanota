@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
 
+import { TodosLayout } from '../components/TodosLayout';
 import { TodoList } from '../components/TodoList';
 import { extractId } from '../utils/todo';
 import { useOrderedList } from '../hooks/useOrderedList';
@@ -36,7 +37,7 @@ export function TodosContainer() {
     useGlobalKeystroke(Key.ArrowUp, selectPrevious);
 
     return (
-        <div>
+        <TodosLayout>
             <input
                 autoFocus
                 value={inputValue}
@@ -50,6 +51,6 @@ export function TodosContainer() {
                 selectedItemId={selectedId}
                 todos={todosList}
             />
-        </div>
+        </TodosLayout>
     );
 }
