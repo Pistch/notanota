@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 
 import { ITodo } from '../types';
 import { createTodo, persistTodos, getStoredTodos } from '../utils/todo';
 
 export function useTodosState() {
-    const [todosList, setList] = useState<ITodo[]>(getStoredTodos());
+    const storedTodos = useMemo(() => getStoredTodos(), []);
+    const [todosList, setList] = useState<ITodo[]>(storedTodos);
     const addTodo = useCallback((text: string) => {
         setList(todosList.concat(createTodo(text)));
     }, [todosList]);
@@ -20,5 +21,5 @@ export function useTodosState() {
         todosList,
         addTodo,
         deleteTodo,
-    }
+    };
 }

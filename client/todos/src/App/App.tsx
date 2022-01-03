@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { ITodo } from '../types';
 import { extractId } from '../utils/todo';
@@ -36,15 +36,15 @@ function ListItem(props: IListItemProps) {
     }, [item, onSelect]);
 
     return (
-            <li
-                className={isSelected ? classes.selected : ''}
-                onMouseEnter={handleMouseEnter}
-            >
-                <span>{item.text}</span>
-                {isSelected && (
-                    <ListItemControls {...props} />
-                )}
-            </li>
+        <li
+            className={isSelected ? classes.selected : ''}
+            onMouseEnter={handleMouseEnter}
+        >
+            <span>{item.text}</span>
+            {isSelected && (
+                <ListItemControls {...props} />
+            )}
+        </li>
     );
 }
 
