@@ -3,11 +3,12 @@ import classNames from 'classnames';
 
 import { ITodo } from '../../types';
 import { useGlobalKeystroke, Key } from '../../hooks/useGlobalKeystroke';
+import { TodoList } from '../TodoList';
 import classes from './TodoItem.module.css';
 
 interface ITodoItemProps {
-    isSelected: boolean;
     item: ITodo;
+    selectedItemId: string | null;
     onSelect: (id: ITodo['id']) => void;
     onDelete: (idToDelete: ITodo['id']) => void;
 }
@@ -28,21 +29,34 @@ function TodoItemControls(props: ITodoItemProps) {
 }
 
 export function TodoItem(props: ITodoItemProps) {
-    const { onSelect, isSelected, item } = props;
+    const { onSelect, selectedItemId, item } = props;
+    const isSelected = selectedItemId === item.id;
     const handleMouseEnter = useCallback(() => {
-        props.onSelect(props.item.id);
+        onSelect(item.id);
     }, [item, onSelect]);
 
     return (
         <li
-            className={classNames({
+            className={classNames(classes.wrapper, {
                 [classes.selected]: isSelected,
             })}
-            onMouseEnter={handleMouseEnter}
         >
-            <span>{item.text}</span>
-            {isSelected && (
-                <TodoItemControls {...props} />
+            <div
+                className={classes.item}
+                onMouseEnter={handleMouseEnter}
+            >
+                <span className={classes.itemText}>{item.text}</span>
+                {isSelected && (
+                    <TodoItemControls {...props} />
+                )}
+            </div>
+            {item.children.length > 0 && (
+                <TodoList
+                    onSelect={onSelect}
+                    onDelete={props.onDelete}
+                    selectedItemId={selectedItemId}
+                    todos={item.children}
+                />
             )}
         </li>
     );

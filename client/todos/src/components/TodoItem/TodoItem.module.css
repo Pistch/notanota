@@ -1,3 +1,7 @@
-.selected {
+.selected .itemText {
     color: blue;
+}
+
+.item {
+    display: flex;
 }

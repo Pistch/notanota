@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 
-import { TodoItem } from '../components/TodoItem';
+import { TodoList } from '../components/TodoList';
 import { extractId } from '../utils/todo';
 import { useOrderedList } from '../hooks/useOrderedList';
 import { useTodosState } from '../hooks/useTodosState';
@@ -10,7 +10,7 @@ export function App() {
   const { todosList, deleteTodo, addTodo } = useTodosState();
   const [inputValue, setInputValue] = useState('');
   const {
-    selectedIndex,
+    selectedId,
     selectPrevious,
     selectNext,
     selectItemById,
@@ -36,7 +36,7 @@ export function App() {
   useGlobalKeystroke(Key.ArrowUp, selectPrevious);
 
   return (
-    <div className="App">
+    <div>
       <input
           autoFocus
           value={inputValue}
@@ -44,17 +44,12 @@ export function App() {
           onBlur={handleInputBlur}
       />
 
-      <ul>
-        {todosList.map((item, i) => (
-            <TodoItem
-                key={item.id}
-                item={item}
-                isSelected={i === selectedIndex}
-                onSelect={selectItemById}
-                onDelete={deleteTodo}
-            />
-        ))}
-      </ul>
+      <TodoList
+          onSelect={selectItemById}
+          onDelete={deleteTodo}
+          selectedItemId={selectedId}
+          todos={todosList}
+      />
     </div>
   );
 }
