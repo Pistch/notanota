@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { TodosContainer } from '../containers/TodosContainer';
+import { TodosContainer } from './TodosContainer';
 
 export function App() {
   return (
