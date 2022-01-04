@@ -24,7 +24,7 @@ export function MainInput(props: IMainInputProps) {
 
         onSubmit(inputValue);
         setInputValue('');
-    }, [onSubmit]);
+    }, [inputValue, setInputValue, onSubmit]);
 
     useGlobalKeystroke(Key.Enter, handleSubmit);
 

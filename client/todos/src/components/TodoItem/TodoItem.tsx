@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import classNames from 'classnames';
 
 import { ITodo } from '../../types';
@@ -8,28 +8,45 @@ import classes from './TodoItem.module.css';
 
 interface ITodoItemProps {
     item: ITodo;
+    level: number;
     selectedItemId: string | null;
+    setCurrentRootId: (newRootId: ITodo['id']) => void;
     onSelect: (id: ITodo['id']) => void;
     onDelete: (idToDelete: ITodo['id']) => void;
 }
 
+interface ITodoItemKeystrokesProps {
+    item: ITodo;
+    onDelete: () => void;
+}
+
+function TodoItemKeystrokes(props: ITodoItemKeystrokesProps) {
+    useGlobalKeystroke(Key.Escape, props.onDelete);
+    // TODO(pistch): keystroke for root change
+
+    return null;
+}
+
 function TodoItemControls(props: ITodoItemProps) {
-    const { onDelete, item } = props;
+    const { onDelete, setCurrentRootId, item } = props;
     const handleDelete = useCallback(() => {
         onDelete(item.id);
     }, [onDelete, item]);
-
-    useGlobalKeystroke(Key.Escape, handleDelete);
+    const handleCurrentRootChange = useCallback(() => {
+        setCurrentRootId(item.id);
+    }, [setCurrentRootId, item]);
 
     return (
-        <div style={{ display: 'inline-block', marginRight: 10 }}>
+        <div className={classes.controls}>
+            {props.level === 0 && <TodoItemKeystrokes item={item} onDelete={handleDelete} />}
             <button onClick={handleDelete}>x</button>
+            <button onClick={handleCurrentRootChange}>f</button>
         </div>
     );
 }
 
 export function TodoItem(props: ITodoItemProps) {
-    const { onSelect, selectedItemId, item } = props;
+    const { onSelect, selectedItemId, item, setCurrentRootId, level } = props;
     const isSelected = selectedItemId === item.id;
     const handleMouseEnter = useCallback(() => {
         onSelect(item.id);
@@ -37,26 +54,30 @@ export function TodoItem(props: ITodoItemProps) {
 
     return (
         <li
-            className={classNames(classes.wrapper, {
-                [classes.selected]: isSelected,
-            })}
+            className={classes.wrapper}
         >
             <div
-                className={classes.item}
+                className={classNames(classes.item, {
+                    [classes.selected]: isSelected,
+                })}
                 onMouseEnter={handleMouseEnter}
             >
                 <span className={classes.itemText}>{item.text}</span>
-                {isSelected && (
-                    <TodoItemControls {...props} />
-                )}
+                <TodoItemControls {...props} />
             </div>
             {item.children.length > 0 && (
-                <TodoList
-                    onSelect={onSelect}
-                    onDelete={props.onDelete}
-                    selectedItemId={selectedItemId}
-                    todos={item.children}
-                />
+                level > 2 ? (
+                    <button onClick={() => setCurrentRootId(item.id)}>...</button>
+                ) : (
+                    <TodoList
+                        level={level + 1}
+                        onSelect={onSelect}
+                        onDelete={props.onDelete}
+                        setCurrentRootId={setCurrentRootId}
+                        selectedItemId={selectedItemId}
+                        todos={item.children}
+                    />
+                )
             )}
         </li>
     );

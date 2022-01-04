@@ -34,7 +34,7 @@ function extractTodoFromStored(todo: IStoredTodo, children?: ITodo[]): ITodo {
     };
 }
 
-function getSubtree(
+export function buildTree(
     todos: IStoredTodo[],
     todosMap: Record<string, IStoredTodo>,
     parentId: string | null,
@@ -59,35 +59,23 @@ function getSubtree(
 
     return result
         .map(todo => {
-            return extractTodoFromStored(todo, getSubtree(todos, todosMap, todo.id));
+            return extractTodoFromStored(todo, buildTree(todos, todosMap, todo.id));
         });
 }
 
-function buildTree(todos: IStoredTodo[]): ITodo[] {
-    const todosMap = todos.reduce((todosMap, todo) => {
-        todosMap[todo.id] = todo;
-
-        return todosMap;
-    }, {} as Record<string, IStoredTodo>);
-
-    return getSubtree(todos, todosMap, null);
-}
-
 export function getStoredTodos() {
-    const fromStorage = get<IStoredTodo[] | null>(
+    return get<IStoredTodo[] | null>(
         lsTodosKey,
         () => [],
         () => null,
     );
-
-    return fromStorage ? buildTree(fromStorage) : prepareDefaultData();
 }
 
-function normalizeTree(todos: ITodo[]): IStoredTodo[] {
+export function normalizeTree(todos: ITodo[], startingParentId: string | null): IStoredTodo[] {
     type TProcessingItem = { todos: ITodo[], parentId: string | null };
 
     const processingQueue: TProcessingItem[] = [
-        { todos, parentId: null }
+        { todos, parentId: startingParentId }
     ];
     const result: IStoredTodo[] = [];
 
@@ -117,6 +105,6 @@ function normalizeTree(todos: ITodo[]): IStoredTodo[] {
     return result;
 }
 
-export function persistTodos(todos: ITodo[]) {
-    persist(lsTodosKey, normalizeTree(todos));
+export function persistTodos(todos: IStoredTodo[]) {
+    persist(lsTodosKey, todos);
 }

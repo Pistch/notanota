@@ -1,24 +1,67 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 
-import { ITodo } from '../types';
-import { createTodo, persistTodos, getStoredTodos } from '../utils/todo';
+import { IStoredTodo, ITodo } from '../types';
+import {
+    createTodo,
+    persistTodos,
+    getStoredTodos,
+    buildTree,
+    normalizeTree,
+    prepareDefaultData,
+} from '../utils/todo';
 
-export function useTodosState() {
-    const storedTodos = useMemo(() => getStoredTodos(), []);
-    const [todosList, setList] = useState<ITodo[]>(storedTodos);
+export function useTodosState(currentRootId: string | null) {
+    const _storedTodos = useMemo<IStoredTodo[]>(() => getStoredTodos() || normalizeTree(prepareDefaultData(), null), []);
+    const [todos, setTodos] = useState(_storedTodos);
+    const todosMap = useMemo(() => {
+        return todos.reduce((map, todo) => {
+            map[todo.id] = todo;
+
+            return map;
+        }, {} as Record<string, IStoredTodo>);
+    }, [todos]);
+    const todosTree = useMemo(() => buildTree(todos, todosMap, currentRootId), [currentRootId, todos, todosMap]);
+    const pathToRoot = useMemo(() => {
+        if (!currentRootId) {
+            return [];
+        }
+
+        const result = [];
+        let item: IStoredTodo | null = todosMap[currentRootId];
+
+        while (item) {
+            result.push(item);
+
+            if (!item.parentId) {
+                item = null;
+            } else {
+                item = todosMap[item.parentId];
+            }
+        }
+
+        return result;
+    }, [todosMap, currentRootId]);
+    const modifyCurrentList = useCallback((newValue: ITodo[]) => {
+        const newCurrentList = normalizeTree(newValue, currentRootId);
+
+        setTodos(todos
+            .filter(todo => todo.parentId !== currentRootId)
+            .concat(newCurrentList));
+    }, [todos, setTodos, currentRootId]);
     const addTodo = useCallback((text: string) => {
-        setList(todosList.concat(createTodo(text)));
-    }, [todosList]);
+        modifyCurrentList(todosTree.concat(createTodo(text)));
+    }, [todosTree, modifyCurrentList]);
     const deleteTodo = useCallback((idToDelete: ITodo['id']) => {
-        setList(todosList.filter(item => item.id !== idToDelete));
-    }, [todosList, setList]);
+        modifyCurrentList(todosTree.filter(item => item.id !== idToDelete));
+    }, [todosTree, modifyCurrentList]);
 
     useEffect(() => {
-        persistTodos(todosList);
-    }, [todosList]);
+        persistTodos(todos);
+    }, [todos]);
 
     return {
-        todosList,
+        todosTree,
+        pathToRoot,
         addTodo,
         deleteTodo,
     };
