@@ -20,10 +20,12 @@ export function TodosContainer() {
     } = useOrderedList(todosTree, extractId);
 
     const goUpLevel = useCallback(() => {
+        console.log(pathToRoot);
+
         if (pathToRoot.length === 1) {
             setCurrentRootId(null);
         } else if (pathToRoot.length > 1) {
-            setCurrentRootId(pathToRoot[0].id);
+            setCurrentRootId(pathToRoot[1].id);
         }
     }, [pathToRoot, setCurrentRootId]);
 
