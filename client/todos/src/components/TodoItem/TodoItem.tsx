@@ -11,6 +11,8 @@ interface ITodoItemProps {
     level: number;
     selectedItemId: string | null;
     setCurrentRootId: (newRootId: ITodo['id']) => void;
+    moveTodoUp: (todo: ITodo) => void;
+    moveTodoDown: (todo: ITodo) => void;
     onSelect: (id: ITodo['id']) => void;
     onDelete: (idToDelete: ITodo['id']) => void;
 }
@@ -19,9 +21,14 @@ interface ITodoItemKeystrokesProps {
     item: ITodo;
     onDelete: () => void;
     onRootChange: () => void;
+    onMoveUp: () => void;
+    onMoveDown: () => void;
 }
 
 function TodoItemKeystrokes(props: ITodoItemKeystrokesProps) {
+    useGlobalKeystroke(keystroke(modifierKeysMap.meta, keyMap.delete), props.onDelete);
+    useGlobalKeystroke(keystroke(modifierKeysMap.meta, keyMap.arrowUp), props.onMoveUp);
+    useGlobalKeystroke(keystroke(modifierKeysMap.meta, keyMap.arrowDown), props.onMoveDown);
     useGlobalKeystroke(keystroke(modifierKeysMap.meta, keyMap.delete), props.onDelete);
     useGlobalKeystroke(keyMap.enter, props.onRootChange);
 
@@ -29,13 +36,26 @@ function TodoItemKeystrokes(props: ITodoItemKeystrokesProps) {
 }
 
 function TodoItemControls(props: ITodoItemProps) {
-    const { onDelete, setCurrentRootId, item, selectedItemId } = props;
+    const {
+        onDelete,
+        setCurrentRootId,
+        item,
+        selectedItemId,
+        moveTodoDown,
+        moveTodoUp,
+    } = props;
     const handleDelete = useCallback(() => {
         onDelete(item.id);
     }, [onDelete, item]);
     const handleCurrentRootChange = useCallback(() => {
         setCurrentRootId(item.id);
     }, [setCurrentRootId, item]);
+    const handleMoveTodoDown = useCallback(() => {
+        moveTodoDown(item);
+    }, [moveTodoDown, item]);
+    const handleMoveTodoUp = useCallback(() => {
+        moveTodoUp(item);
+    }, [moveTodoUp, item]);
 
     return (
         <div className={classes.controls}>
@@ -44,6 +64,8 @@ function TodoItemControls(props: ITodoItemProps) {
                     item={item}
                     onDelete={handleDelete}
                     onRootChange={handleCurrentRootChange}
+                    onMoveDown={handleMoveTodoDown}
+                    onMoveUp={handleMoveTodoUp}
                 />
             )}
             <button onClick={handleCurrentRootChange}>select</button>
@@ -83,6 +105,8 @@ export function TodoItem(props: ITodoItemProps) {
                         level={level + 1}
                         onSelect={onSelect}
                         onDelete={props.onDelete}
+                        moveTodoUp={props.moveTodoUp}
+                        moveTodoDown={props.moveTodoDown}
                         setCurrentRootId={setCurrentRootId}
                         selectedItemId={selectedItemId}
                         todos={item.children}

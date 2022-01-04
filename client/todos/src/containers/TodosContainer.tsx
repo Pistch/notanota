@@ -11,7 +11,14 @@ import { useGlobalKeystroke, keyMap } from '../hooks/useGlobalKeystroke';
 
 export function TodosContainer() {
     const [currentRootId, setCurrentRootId] = useState<string | null>(null);
-    const { todosTree, pathToRoot, deleteTodo, addTodo } = useTodosState(currentRootId);
+    const {
+        todosTree,
+        pathToRoot,
+        deleteTodo,
+        addTodo,
+        moveTodoDown,
+        moveTodoUp,
+    } = useTodosState(currentRootId);
     const {
         selectedId,
         selectPrevious,
@@ -46,6 +53,8 @@ export function TodosContainer() {
                 onDelete={deleteTodo}
                 selectedItemId={selectedId}
                 setCurrentRootId={setCurrentRootId}
+                moveTodoUp={moveTodoUp}
+                moveTodoDown={moveTodoDown}
                 todos={todosTree}
             />
         </TodosLayout>

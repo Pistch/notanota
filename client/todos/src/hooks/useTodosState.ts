@@ -22,6 +22,9 @@ export function useTodosState(currentRootId: string | null) {
         }, {} as Record<string, IStoredTodo>);
     }, [todos]);
     const todosTree = useMemo(() => buildTree(todos, todosMap, currentRootId), [currentRootId, todos, todosMap]);
+    const cachedBuildTree = useCallback((rootId: string | null) => {
+        return rootId === currentRootId ? todosTree : buildTree(todos, todosMap, rootId);
+    }, [todos, todosMap, todosTree, currentRootId]);
     const pathToRoot = useMemo(() => {
         if (!currentRootId) {
             return [];
@@ -49,7 +52,7 @@ export function useTodosState(currentRootId: string | null) {
 
             return map;
         }, {} as Record<string, boolean>);
-        const mapOfItemsToRemove = normalizeTree(buildTree(todos, todosMap, rootId), rootId)
+        const mapOfItemsToRemove = normalizeTree(cachedBuildTree(rootId), rootId)
             .filter(todo => !newItemsMap[todo.id])
             .reduce((map, todo) => {
                 map[todo.id] = true;
@@ -62,20 +65,67 @@ export function useTodosState(currentRootId: string | null) {
                 .filter(todo => todo.parentId !== rootId && !mapOfItemsToRemove[todo.id])
                 .concat(newCurrentList),
         );
-    }, [todos, setTodos]);
+    }, [todos, setTodos, cachedBuildTree]);
     const addTodo = useCallback((text: string) => {
         modifyList(currentRootId, todosTree.concat(createTodo(text)));
-    }, [todosTree, currentRootId]);
+    }, [todosTree, currentRootId, modifyList]);
     const deleteTodo = useCallback((idToDelete: ITodo['id']) => {
         const parentId = todosMap[idToDelete].parentId;
-        const treePartToModify = parentId === currentRootId
-            ? todosTree
-            : buildTree(todos, todosMap, parentId);
+        const targetTreePart = cachedBuildTree(parentId);
 
-        modifyList(parentId, treePartToModify.filter(item => item.id !== idToDelete));
+        modifyList(parentId, targetTreePart.filter(item => item.id !== idToDelete));
+    }, [todosMap, modifyList, cachedBuildTree]);
+    const relocateTodo = useCallback((todo: ITodo, changesRequested: Partial<Pick<IStoredTodo, 'parentId' | 'previousId' | 'nextId'>>) => {
+        if (Object.keys(changesRequested).length < 1) {
+            return;
+        }
 
+        const storedTodo = todosMap[todo.id];
+        const targetParentId = 'parentId' in changesRequested ? changesRequested.parentId as string | null : storedTodo.parentId;
+        const shouldChangeParent = targetParentId !== storedTodo.parentId;
+        const shouldRemoveInPlace = !shouldChangeParent;
+        const shouldPlaceToTheEnd = !changesRequested.nextId && !changesRequested.previousId;
+        const targetTreePart = [...cachedBuildTree(targetParentId)];
 
-    }, [todosTree, modifyList]);
+        if (shouldChangeParent) {
+            modifyList(storedTodo.parentId, cachedBuildTree(storedTodo.parentId).filter(listItem => listItem.id !== todo.id));
+        }
+
+        if (shouldRemoveInPlace) {
+            const currentIndex = targetTreePart.findIndex(todo => todo.id === storedTodo.id);
+
+            targetTreePart.splice(currentIndex, 1);
+        }
+
+        if (shouldPlaceToTheEnd) {
+            modifyList(targetParentId, targetTreePart.concat(todo));
+        } else {
+            const isLookingForPrevious = 'previousId' in changesRequested;
+            const amountToShiftTargetPosition = Number(isLookingForPrevious);
+            const targetIndex = targetTreePart.findIndex(todo => todo.id === (isLookingForPrevious ? changesRequested.previousId as string | null : changesRequested.nextId as string | null));
+
+            targetTreePart.splice(targetIndex + amountToShiftTargetPosition, 0, todo);
+            modifyList(targetParentId, targetTreePart);
+        }
+    }, [todosMap, modifyList, cachedBuildTree]);
+    const moveTodoUp = useCallback((todo: ITodo) => {
+        const storedTodo = todosMap[todo.id];
+        const targetTreePart = cachedBuildTree(storedTodo.parentId);
+        const currentTodoIndex = targetTreePart.findIndex(todo => todo.id === storedTodo.id);
+
+        if (currentTodoIndex > 0) {
+            relocateTodo(todo, { nextId: targetTreePart[currentTodoIndex - 1].id });
+        }
+    }, [cachedBuildTree, todosMap, relocateTodo]);
+    const moveTodoDown = useCallback((todo: ITodo) => {
+        const storedTodo = todosMap[todo.id];
+        const targetTreePart = cachedBuildTree(storedTodo.parentId);
+        const currentTodoIndex = targetTreePart.findIndex(todo => todo.id === storedTodo.id);
+
+        if (currentTodoIndex < targetTreePart.length - 1) {
+            relocateTodo(todo, { previousId: targetTreePart[currentTodoIndex + 1].id });
+        }
+    }, [cachedBuildTree, todosMap, relocateTodo]);
 
     useEffect(() => {
         persistTodos(todos);
@@ -86,5 +136,8 @@ export function useTodosState(currentRootId: string | null) {
         pathToRoot,
         addTodo,
         deleteTodo,
+        relocateTodo,
+        moveTodoUp,
+        moveTodoDown,
     };
 }
