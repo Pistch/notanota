@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 
 import { TodosLayout } from '../components/TodosLayout';
+import { TodosPath } from '../components/TodosPath';
 import { TodoList } from '../components/TodoList';
 import { MainInput } from '../components/MainInput';
 import { extractId } from '../utils/todo';
@@ -32,21 +33,7 @@ export function TodosContainer() {
 
     return (
         <TodosLayout>
-            {pathToRoot.length > 0 && (
-                <div>
-                    <i onClick={() => setCurrentRootId(null)}>
-                        Root
-                    </i>
-                    {pathToRoot.reverse().map(todo => (
-                        <span
-                            key={todo.id}
-                            onClick={() => setCurrentRootId(todo.id)}
-                        >
-                           / {todo.text}
-                        </span>
-                    ))}
-                </div>
-            )}
+            <TodosPath pathToRoot={pathToRoot} setCurrentRootId={setCurrentRootId} />
 
             <MainInput
                 placeholder="e.g. 'wash dishes'"

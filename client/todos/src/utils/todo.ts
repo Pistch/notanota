@@ -25,7 +25,7 @@ export function prepareDefaultData() {
     ].map(createTodo);
 }
 
-function extractTodoFromStored(todo: IStoredTodo, children?: ITodo[]): ITodo {
+export function extractTodoFromStored(todo: IStoredTodo, children?: ITodo[]): ITodo {
     const { nextId, previousId, parentId, ...rawTodo } = todo;
 
     return {

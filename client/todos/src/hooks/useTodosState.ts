@@ -8,6 +8,7 @@ import {
     buildTree,
     normalizeTree,
     prepareDefaultData,
+    extractTodoFromStored,
 } from '../utils/todo';
 
 export function useTodosState(currentRootId: string | null) {
@@ -39,7 +40,7 @@ export function useTodosState(currentRootId: string | null) {
             }
         }
 
-        return result;
+        return result.map(todo => extractTodoFromStored(todo));
     }, [todosMap, currentRootId]);
     const modifyCurrentList = useCallback((newValue: ITodo[]) => {
         const newCurrentList = normalizeTree(newValue, currentRootId);

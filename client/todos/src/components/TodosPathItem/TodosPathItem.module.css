@@ -1,0 +1,16 @@
+.wrapper {
+    cursor: pointer;
+    font-variant: small-caps;
+}
+
+.wrapper:hover {
+    opacity: .7;
+}
+
+.wrapper.root {
+    font-style: italic;
+}
+
+.wrapper + .wrapper::before {
+    content: ' / '
+}

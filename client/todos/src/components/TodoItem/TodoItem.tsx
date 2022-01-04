@@ -46,8 +46,8 @@ function TodoItemControls(props: ITodoItemProps) {
                     onRootChange={handleCurrentRootChange}
                 />
             )}
+            <button onClick={handleCurrentRootChange}>select</button>
             <button onClick={handleDelete}>x</button>
-            <button onClick={handleCurrentRootChange}>f</button>
         </div>
     );
 }
@@ -58,6 +58,9 @@ export function TodoItem(props: ITodoItemProps) {
     const handleMouseEnter = useCallback(() => {
         onSelect(item.id);
     }, [item, onSelect]);
+    const handleCurrentRootChange = useCallback(() => {
+        setCurrentRootId(item.id);
+    }, [setCurrentRootId, item]);
 
     return (
         <li className={classes.wrapper}>
@@ -67,12 +70,14 @@ export function TodoItem(props: ITodoItemProps) {
                 })}
                 onMouseEnter={handleMouseEnter}
             >
-                <span className={classes.itemText}>{item.text}</span>
+                <span className={classes.itemText}>
+                    {item.text}
+                </span>
                 <TodoItemControls {...props} />
             </div>
             {item.children.length > 0 && (
                 level > 2 ? (
-                    <button onClick={() => setCurrentRootId(item.id)}>...</button>
+                    <button onClick={handleCurrentRootChange}>...</button>
                 ) : (
                     <TodoList
                         level={level + 1}
