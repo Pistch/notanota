@@ -42,19 +42,24 @@ export function useTodosState(currentRootId: string | null) {
 
         return result.map(todo => extractTodoFromStored(todo));
     }, [todosMap, currentRootId]);
-    const modifyCurrentList = useCallback((newValue: ITodo[]) => {
-        const newCurrentList = normalizeTree(newValue, currentRootId);
+    const modifyList = useCallback((rootId: string | null, newValue: ITodo[]) => {
+        const newCurrentList = normalizeTree(newValue, rootId);
 
         setTodos(todos
-            .filter(todo => todo.parentId !== currentRootId)
+            .filter(todo => todo.parentId !== rootId)
             .concat(newCurrentList));
-    }, [todos, setTodos, currentRootId]);
+    }, [todos, setTodos]);
     const addTodo = useCallback((text: string) => {
-        modifyCurrentList(todosTree.concat(createTodo(text)));
-    }, [todosTree, modifyCurrentList]);
+        modifyList(currentRootId, todosTree.concat(createTodo(text)));
+    }, [todosTree, currentRootId]);
     const deleteTodo = useCallback((idToDelete: ITodo['id']) => {
-        modifyCurrentList(todosTree.filter(item => item.id !== idToDelete));
-    }, [todosTree, modifyCurrentList]);
+        const parentId = todosMap[idToDelete].parentId;
+        const treePartToModify = parentId === currentRootId
+            ? todosTree
+            : buildTree(todos, todosMap, parentId);
+
+        modifyList(parentId, treePartToModify.filter(item => item.id !== idToDelete))
+    }, [todosTree, modifyList]);
 
     useEffect(() => {
         persistTodos(todos);
