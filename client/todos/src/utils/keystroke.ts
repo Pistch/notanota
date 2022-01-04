@@ -1,16 +1,24 @@
-export enum Key {
-    ArrowUp = 'ArrowUp',
-    ArrowDown = 'ArrowDown',
-    Escape = 'Escape',
-    Enter = 'Enter',
-}
+import { isMac } from './env';
 
-export interface IKeystrokeData {
-    key: Key
-}
+export const keyMap = {
+    arrowUp: 'up',
+    arrowDown: 'down',
+    arrowRight: 'right',
+    arrowLeft: 'left',
+    escape: 'escape',
+    enter: 'enter',
+    delete: isMac() ? 'backspace' : 'delete',
+};
 
-export function parseKeystroke(keystroke: string): IKeystrokeData {
-    return {
-        key: keystroke as Key
-    };
+export const modifierKeysMap = {
+    alt: 'alt',
+    shift: 'shift',
+    meta: isMac() ? 'cmd' : 'ctrl',
+};
+
+type TKey = (typeof keyMap)[keyof typeof keyMap] |
+    (typeof modifierKeysMap)[keyof typeof modifierKeysMap];
+
+export function keystroke(...keys: TKey[]) {
+    return keys.join('+');
 }

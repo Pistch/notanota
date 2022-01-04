@@ -1,8 +1,8 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import classNames from 'classnames';
 
 import { ITodo } from '../../types';
-import { useGlobalKeystroke, Key } from '../../hooks/useGlobalKeystroke';
+import { useGlobalKeystroke, keyMap, modifierKeysMap, keystroke } from '../../hooks/useGlobalKeystroke';
 import { TodoList } from '../TodoList';
 import classes from './TodoItem.module.css';
 
@@ -18,17 +18,18 @@ interface ITodoItemProps {
 interface ITodoItemKeystrokesProps {
     item: ITodo;
     onDelete: () => void;
+    onRootChange: () => void;
 }
 
 function TodoItemKeystrokes(props: ITodoItemKeystrokesProps) {
-    useGlobalKeystroke(Key.Escape, props.onDelete);
-    // TODO(pistch): keystroke for root change
+    useGlobalKeystroke(keystroke(modifierKeysMap.meta, keyMap.delete), props.onDelete);
+    useGlobalKeystroke(keyMap.enter, props.onRootChange);
 
     return null;
 }
 
 function TodoItemControls(props: ITodoItemProps) {
-    const { onDelete, setCurrentRootId, item } = props;
+    const { onDelete, setCurrentRootId, item, selectedItemId } = props;
     const handleDelete = useCallback(() => {
         onDelete(item.id);
     }, [onDelete, item]);
@@ -38,7 +39,13 @@ function TodoItemControls(props: ITodoItemProps) {
 
     return (
         <div className={classes.controls}>
-            {props.level === 0 && <TodoItemKeystrokes item={item} onDelete={handleDelete} />}
+            {item.id === selectedItemId && (
+                <TodoItemKeystrokes
+                    item={item}
+                    onDelete={handleDelete}
+                    onRootChange={handleCurrentRootChange}
+                />
+            )}
             <button onClick={handleDelete}>x</button>
             <button onClick={handleCurrentRootChange}>f</button>
         </div>
@@ -53,9 +60,7 @@ export function TodoItem(props: ITodoItemProps) {
     }, [item, onSelect]);
 
     return (
-        <li
-            className={classes.wrapper}
-        >
+        <li className={classes.wrapper}>
             <div
                 className={classNames(classes.item, {
                     [classes.selected]: isSelected,
