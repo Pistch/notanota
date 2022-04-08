@@ -30,7 +30,7 @@ function TodoItemKeystrokes(props: ITodoItemKeystrokesProps) {
     useGlobalKeystroke(keystroke(modifierKeysMap.meta, keyMap.arrowUp), props.onMoveUp);
     useGlobalKeystroke(keystroke(modifierKeysMap.meta, keyMap.arrowDown), props.onMoveDown);
     useGlobalKeystroke(keystroke(modifierKeysMap.meta, keyMap.delete), props.onDelete);
-    useGlobalKeystroke(keyMap.enter, props.onRootChange);
+    useGlobalKeystroke(keystroke(modifierKeysMap.meta, keyMap.enter), props.onRootChange);
 
     return null;
 }
@@ -68,8 +68,18 @@ function TodoItemControls(props: ITodoItemProps) {
                     onMoveUp={handleMoveTodoUp}
                 />
             )}
-            <button onClick={handleCurrentRootChange}>select</button>
-            <button onClick={handleDelete}>x</button>
+            <button
+                onClick={handleCurrentRootChange}
+                className={classes.button}
+            >
+                select
+            </button>
+            <button
+                onClick={handleDelete}
+                className={classes.button}
+            >
+                x
+            </button>
         </div>
     );
 }

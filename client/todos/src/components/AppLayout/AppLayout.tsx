@@ -1,8 +1,10 @@
 import React, { PropsWithChildren } from 'react';
 
+import classes from './AppLayout.module.css';
+
 export function AppLayout(props: PropsWithChildren<Record<never, never>>) {
     return (
-        <div>
+        <div className={classes.wrapper}>
             {props.children}
         </div>
     );

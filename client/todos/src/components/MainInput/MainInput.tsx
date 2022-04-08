@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 
-import { keyMap, modifierKeysMap, keystroke, useGlobalKeystroke } from '../../hooks/useGlobalKeystroke';
+import { keyMap, useGlobalKeystroke } from '../../hooks/useGlobalKeystroke';
+import classes from './MainInput.module.css';
 
 export interface IMainInputProps {
     onSubmit: (text: string) => void;
@@ -31,7 +32,7 @@ export function MainInput(props: IMainInputProps) {
         setInputValue('');
     }, [inputValue, setInputValue, onSubmit]);
 
-    useGlobalKeystroke(keystroke(modifierKeysMap.meta, keyMap.enter), handleSubmit);
+    useGlobalKeystroke(keyMap.enter, handleSubmit);
 
     return (
         <input
@@ -41,6 +42,7 @@ export function MainInput(props: IMainInputProps) {
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             onBlur={handleInputBlur}
+            className={classes.wrapper}
         />
     );
 }

@@ -2,6 +2,7 @@ import React from 'react';
 
 import { ITodo } from '../../types';
 import { TodoItem } from '../TodoItem';
+import classes from './TodoList.module.css';
 
 interface ITodoListProps {
     level: number;
@@ -16,7 +17,7 @@ interface ITodoListProps {
 
 export function TodoList(props: ITodoListProps) {
     return (
-        <ul>
+        <ul className={classes.wrapper}>
             {props.todos.map(todo => (
                 <TodoItem
                     key={todo.id}

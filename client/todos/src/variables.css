@@ -1,0 +1,9 @@
+:root {
+    --sizing-unit: 4px;
+    --color-surface: #223340;
+    --color-text-main: #cc9900;
+    --color-text-accent: #ffcc00;
+    --color-text-secondary: #aaa;
+    --color-control-main: #556680;
+    --color-control-accent: #7788a0;
+}

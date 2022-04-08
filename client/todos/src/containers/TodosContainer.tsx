@@ -40,23 +40,28 @@ export function TodosContainer() {
 
     return (
         <TodosLayout>
-            <TodosPath pathToRoot={pathToRoot} setCurrentRootId={setCurrentRootId} />
+            <TodosLayout.Header>
+                <TodosPath pathToRoot={pathToRoot} setCurrentRootId={setCurrentRootId} />
+                <TodosLayout.Input>
+                    <MainInput
+                        placeholder="e.g. 'wash dishes'"
+                        onSubmit={addTodo}
+                    />
+                </TodosLayout.Input>
+            </TodosLayout.Header>
 
-            <MainInput
-                placeholder="e.g. 'wash dishes'"
-                onSubmit={addTodo}
-            />
-
-            <TodoList
-                level={0}
-                onSelect={selectItemById}
-                onDelete={deleteTodo}
-                selectedItemId={selectedId}
-                setCurrentRootId={setCurrentRootId}
-                moveTodoUp={moveTodoUp}
-                moveTodoDown={moveTodoDown}
-                todos={todosTree}
-            />
+            <TodosLayout.Main>
+                <TodoList
+                    level={0}
+                    onSelect={selectItemById}
+                    onDelete={deleteTodo}
+                    selectedItemId={selectedId}
+                    setCurrentRootId={setCurrentRootId}
+                    moveTodoUp={moveTodoUp}
+                    moveTodoDown={moveTodoDown}
+                    todos={todosTree}
+                />
+            </TodosLayout.Main>
         </TodosLayout>
     );
 }

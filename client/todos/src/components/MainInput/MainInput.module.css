@@ -1,0 +1,17 @@
+.wrapper {
+    box-sizing: border-box;
+    color: var(--color-text-main);
+    background-color: var(--color-surface);
+    font-size: 24px;
+    padding: calc(var(--sizing-unit) * 3) calc(var(--sizing-unit) * 2);
+    border: 2px var(--color-control-main) solid;
+    border-radius: var(--sizing-unit);
+}
+
+.wrapper:focus {
+    outline: 2px var(--color-control-accent) solid;
+}
+
+.wrapper::placeholder {
+    color: var(--color-text-secondary);
+}
