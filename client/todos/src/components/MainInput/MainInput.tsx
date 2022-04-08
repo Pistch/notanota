@@ -14,6 +14,11 @@ export function MainInput(props: IMainInputProps) {
     const handleInputBlur = useCallback((evt) => {
         evt.target.focus();
     }, []);
+    const handleKeyDown = useCallback((evt) => {
+        if (evt.key === 'ArrowUp' || evt.key === 'ArrowDown') {
+            evt.preventDefault();
+        }
+    }, [setInputValue]);
     const handleInputChange = useCallback((evt) => {
         setInputValue(evt.target.value);
     }, [setInputValue]);
@@ -34,6 +39,7 @@ export function MainInput(props: IMainInputProps) {
             value={inputValue}
             placeholder={placeholder}
             onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
             onBlur={handleInputBlur}
         />
     );
