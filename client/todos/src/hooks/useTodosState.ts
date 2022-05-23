@@ -1,19 +1,26 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 
 import { IStoredTodo, ITodo } from '../types';
 import {
     createTodo,
-    persistTodos,
-    getStoredTodos,
     buildTree,
     normalizeTree,
     prepareDefaultData,
     extractTodoFromStored,
+    lsTodosKey,
 } from '../utils/todo';
+import { useCommonStorage } from './useCommonStorage';
+
+function getTodosFromLS() {
+    return normalizeTree(prepareDefaultData(), null);
+}
 
 export function useTodosState(currentRootId: string | null) {
-    const _storedTodos = useMemo<IStoredTodo[]>(() => getStoredTodos() || normalizeTree(prepareDefaultData(), null), []);
-    const [todos, setTodos] = useState(_storedTodos);
+    const [todos, setTodos] = useCommonStorage<IStoredTodo[]>(
+        lsTodosKey,
+        getTodosFromLS,
+        getTodosFromLS,
+    );
     const todosMap = useMemo(() => {
         return todos.reduce((map, todo) => {
             map[todo.id] = todo;
@@ -126,10 +133,6 @@ export function useTodosState(currentRootId: string | null) {
             relocateTodo(todo, { previousId: targetTreePart[currentTodoIndex + 1].id });
         }
     }, [cachedBuildTree, todosMap, relocateTodo]);
-
-    useEffect(() => {
-        persistTodos(todos);
-    }, [todos]);
 
     return {
         todosTree,

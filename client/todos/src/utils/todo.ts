@@ -1,8 +1,7 @@
 import { ITodo, IStoredTodo } from '../types';
 import { uniqid } from './uniqid';
-import { get, persist } from './localStorage';
 
-const lsTodosKey = 'todos';
+export const lsTodosKey = 'todos';
 
 export function extractId(todo: ITodo) {
     return todo.id;
@@ -63,14 +62,6 @@ export function buildTree(
         });
 }
 
-export function getStoredTodos() {
-    return get<IStoredTodo[] | null>(
-        lsTodosKey,
-        () => [],
-        () => null,
-    );
-}
-
 export function normalizeTree(todos: ITodo[], startingParentId: string | null): IStoredTodo[] {
     type TProcessingItem = { todos: ITodo[], parentId: string | null };
 
@@ -103,8 +94,4 @@ export function normalizeTree(todos: ITodo[], startingParentId: string | null): 
     }
 
     return result;
-}
-
-export function persistTodos(todos: IStoredTodo[]) {
-    persist(lsTodosKey, todos);
 }
