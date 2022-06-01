@@ -7,10 +7,12 @@ import { MainInput } from '../components/MainInput';
 import { extractId } from '../utils/todo';
 import { useOrderedList } from '../hooks/useOrderedList';
 import { useTodosState } from '../hooks/useTodosState';
+import { useSettings } from '../hooks/useSettings';
 import { useGlobalKeystroke, keyMap } from '../hooks/useGlobalKeystroke';
 
 export function TodosContainer() {
     const [currentRootId, setCurrentRootId] = useState<string | null>(null);
+    const [{ shouldShowPrivate }] = useSettings('shouldShowPrivate');
     const {
         todosTree,
         pathToRoot,
@@ -18,7 +20,7 @@ export function TodosContainer() {
         addTodo,
         moveTodoDown,
         moveTodoUp,
-    } = useTodosState(currentRootId);
+    } = useTodosState(currentRootId, shouldShowPrivate);
     const {
         selectedId,
         selectPrevious,

@@ -11,6 +11,7 @@ export function createTodo(text: string): ITodo {
     return {
         id: uniqid('todo'),
         text,
+        isPrivate: false,
         children: []
     };
 }
@@ -37,9 +38,12 @@ export function buildTree(
     todos: IStoredTodo[],
     todosMap: Record<string, IStoredTodo>,
     parentId: string | null,
+    shouldShowPrivate = true,
 ): ITodo[] {
-    const listStarter = todos
-        .find(todo => !todo.previousId && todo.parentId === parentId);
+    const listStarter = todos.find(todo => (
+        !todo.previousId &&
+        todo.parentId === parentId
+    ));
 
     if (!listStarter) {
         return [];
@@ -53,7 +57,9 @@ export function buildTree(
     let nextItem: IStoredTodo | null = listStarter;
 
     while (nextItem = getNextItem(nextItem)) {
-        result.push(nextItem);
+        if (shouldShowPrivate || !nextItem.isPrivate) {
+            result.push(nextItem);
+        }
     }
 
     return result

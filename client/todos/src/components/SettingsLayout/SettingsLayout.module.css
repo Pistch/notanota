@@ -1,0 +1,20 @@
+.wrapper {
+    width: calc(var(--sizing-unit) * 3);
+    height: calc(var(--sizing-unit) * 3);
+    border-radius: 50%;
+    border: 1px var(--color-control-main) dashed;
+    cursor: pointer;
+}
+
+.wrapper:hover {
+    border-color: var(--color-control-accent);
+}
+
+.wrapper.isActive {
+    border-style: solid;
+    background-color: var(--color-control-main);
+}
+
+.wrapper.isActive:hover {
+    background-color: var(--color-control-accent);
+}

@@ -15,7 +15,10 @@ function getTodosFromLS() {
     return normalizeTree(prepareDefaultData(), null);
 }
 
-export function useTodosState(currentRootId: string | null) {
+export function useTodosState(
+    currentRootId: string | null,
+    shouldShowPrivate: boolean,
+) {
     const [todos, setTodos] = useCommonStorage<IStoredTodo[]>(
         lsTodosKey,
         getTodosFromLS,
@@ -28,7 +31,12 @@ export function useTodosState(currentRootId: string | null) {
             return map;
         }, {} as Record<string, IStoredTodo>);
     }, [todos]);
-    const todosTree = useMemo(() => buildTree(todos, todosMap, currentRootId), [currentRootId, todos, todosMap]);
+    const todosTree = useMemo(() => buildTree(
+        todos,
+        todosMap,
+        currentRootId,
+        shouldShowPrivate,
+    ), [currentRootId, todos, todosMap, shouldShowPrivate]);
     const cachedBuildTree = useCallback((rootId: string | null) => {
         return rootId === currentRootId ? todosTree : buildTree(todos, todosMap, rootId);
     }, [todos, todosMap, todosTree, currentRootId]);
