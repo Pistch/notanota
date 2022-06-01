@@ -57,14 +57,13 @@ export function buildTree(
     let nextItem: IStoredTodo | null = listStarter;
 
     while (nextItem = getNextItem(nextItem)) {
-        if (shouldShowPrivate || !nextItem.isPrivate) {
-            result.push(nextItem);
-        }
+        result.push(nextItem);
     }
 
     return result
+        .filter(todo => !todo.isPrivate || shouldShowPrivate)
         .map(todo => {
-            return extractTodoFromStored(todo, buildTree(todos, todosMap, todo.id));
+            return extractTodoFromStored(todo, buildTree(todos, todosMap, todo.id, shouldShowPrivate));
         });
 }
 

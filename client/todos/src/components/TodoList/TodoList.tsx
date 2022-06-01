@@ -10,6 +10,7 @@ interface ITodoListProps {
     selectedItemId: string | null;
     onSelect: (id: ITodo['id']) => void;
     onDelete: (idToDelete: ITodo['id']) => void;
+    onModify: (idToDelete: ITodo['id'], changes: Partial<Pick<ITodo, 'text' | 'isPrivate'>>) => void;
     moveTodoUp: (todo: ITodo) => void;
     moveTodoDown: (todo: ITodo) => void;
     setCurrentRootId: (newRootId: ITodo['id']) => void;
@@ -29,6 +30,7 @@ export function TodoList(props: ITodoListProps) {
                     selectedItemId={props.selectedItemId}
                     onSelect={props.onSelect}
                     onDelete={props.onDelete}
+                    onModify={props.onModify}
                 />
             ))}
         </ul>

@@ -18,6 +18,7 @@ export function TodosContainer() {
         pathToRoot,
         deleteTodo,
         addTodo,
+        modifyTodo,
         moveTodoDown,
         moveTodoUp,
     } = useTodosState(currentRootId, shouldShowPrivate);
@@ -57,6 +58,7 @@ export function TodosContainer() {
                     level={0}
                     onSelect={selectItemById}
                     onDelete={deleteTodo}
+                    onModify={modifyTodo}
                     selectedItemId={selectedId}
                     setCurrentRootId={setCurrentRootId}
                     moveTodoUp={moveTodoUp}

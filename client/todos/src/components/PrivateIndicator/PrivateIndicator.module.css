@@ -10,7 +10,7 @@
     border-color: var(--color-control-accent);
 }
 
-.wrapper.isActive {
+.wrapper.isOn {
     border-style: solid;
     background-color: var(--color-control-main);
 }

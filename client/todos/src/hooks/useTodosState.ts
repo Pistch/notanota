@@ -141,12 +141,28 @@ export function useTodosState(
             relocateTodo(todo, { previousId: targetTreePart[currentTodoIndex + 1].id });
         }
     }, [cachedBuildTree, todosMap, relocateTodo]);
+    const modifyTodo = useCallback((todoId: ITodo['id'], changes: Partial<Pick<ITodo, 'text' | 'isPrivate'>>) => {
+        const parentId = todosMap[todoId].parentId;
+        const targetTreePart = cachedBuildTree(parentId);
+
+        modifyList(parentId, targetTreePart.map(todo => {
+            if (todo.id !== todoId) {
+                return todo;
+            }
+
+            return {
+                ...todo,
+                ...changes
+            };
+        }));
+    }, [modifyList, todosMap, cachedBuildTree]);
 
     return {
         todosTree,
         pathToRoot,
         addTodo,
         deleteTodo,
+        modifyTodo,
         relocateTodo,
         moveTodoUp,
         moveTodoDown,

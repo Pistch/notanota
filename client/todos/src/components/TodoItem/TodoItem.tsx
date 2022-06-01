@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import { ITodo } from '../../types';
 import { useGlobalKeystroke, keyMap, modifierKeysMap, keystroke } from '../../hooks/useGlobalKeystroke';
 import { TodoList } from '../TodoList';
+import { PrivateIndicator } from '../PrivateIndicator';
 import classes from './TodoItem.module.css';
 
 interface ITodoItemProps {
@@ -15,11 +16,13 @@ interface ITodoItemProps {
     moveTodoDown: (todo: ITodo) => void;
     onSelect: (id: ITodo['id']) => void;
     onDelete: (idToDelete: ITodo['id']) => void;
+    onModify: (idToDelete: ITodo['id'], changes: Partial<Pick<ITodo, 'text' | 'isPrivate'>>) => void;
 }
 
 interface ITodoItemKeystrokesProps {
     item: ITodo;
     onDelete: () => void;
+    onModify: () => void;
     onRootChange: () => void;
     onMoveUp: () => void;
     onMoveDown: () => void;
@@ -31,6 +34,7 @@ function TodoItemKeystrokes(props: ITodoItemKeystrokesProps) {
     useGlobalKeystroke(keystroke(modifierKeysMap.meta, keyMap.arrowDown), props.onMoveDown);
     useGlobalKeystroke(keystroke(modifierKeysMap.meta, keyMap.delete), props.onDelete);
     useGlobalKeystroke(keystroke(modifierKeysMap.meta, keyMap.enter), props.onRootChange);
+    useGlobalKeystroke(keystroke(modifierKeysMap.meta, modifierKeysMap.shift, keyMap.enter), props.onModify);
 
     return null;
 }
@@ -38,6 +42,7 @@ function TodoItemKeystrokes(props: ITodoItemKeystrokesProps) {
 function TodoItemControls(props: ITodoItemProps) {
     const {
         onDelete,
+        onModify,
         setCurrentRootId,
         item,
         selectedItemId,
@@ -56,6 +61,13 @@ function TodoItemControls(props: ITodoItemProps) {
     const handleMoveTodoUp = useCallback(() => {
         moveTodoUp(item);
     }, [moveTodoUp, item]);
+    const handleModify = useCallback((maybeNewValue?: boolean) => {
+        const newValue = typeof maybeNewValue === 'boolean'
+            ? !maybeNewValue
+            : !item.isPrivate
+
+        onModify(item.id, { isPrivate: newValue });
+    }, [onModify, item]);
 
     return (
         <div className={classes.controls}>
@@ -63,11 +75,17 @@ function TodoItemControls(props: ITodoItemProps) {
                 <TodoItemKeystrokes
                     item={item}
                     onDelete={handleDelete}
+                    onModify={handleModify}
                     onRootChange={handleCurrentRootChange}
                     onMoveDown={handleMoveTodoDown}
                     onMoveUp={handleMoveTodoUp}
                 />
             )}
+            <PrivateIndicator
+                isOn={!item.isPrivate}
+                setIsOn={handleModify}
+                className={classes.control}
+            />
             <button
                 onClick={handleCurrentRootChange}
                 className={classes.button}
@@ -115,6 +133,7 @@ export function TodoItem(props: ITodoItemProps) {
                         level={level + 1}
                         onSelect={onSelect}
                         onDelete={props.onDelete}
+                        onModify={props.onModify}
                         moveTodoUp={props.moveTodoUp}
                         moveTodoDown={props.moveTodoDown}
                         setCurrentRootId={setCurrentRootId}

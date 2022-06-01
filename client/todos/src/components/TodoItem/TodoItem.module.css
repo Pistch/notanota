@@ -28,7 +28,12 @@
     opacity: 1;
 }
 
+.control {
+
+}
+
 .button {
+    composes: control;
     border: 1px var(--color-control-main) solid;
     border-radius: var(--sizing-unit);
     background: none;
@@ -37,7 +42,7 @@
     transition: .15s color, border-color;
 }
 
-.button + .button {
+.control + .control {
     margin-left: var(--sizing-unit);
 }
 

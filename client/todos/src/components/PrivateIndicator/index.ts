@@ -1,0 +1,1 @@
+export { PrivateIndicator } from './PrivateIndicator';
